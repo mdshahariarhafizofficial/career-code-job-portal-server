@@ -29,10 +29,13 @@ async function run() {
 
     const db = client.db('careerCodeDB');
     const jobCollection = db.collection('jobs');
+    const applicationsCollection = db.collection('applications');
 
     app.get('/', (req, res) => {
     res.send('Welcome to Career Code Server')
     } )
+
+// ---------- Jobs Api -------------------
 
     // Get All Jobs
     app.get('/jobs', async (req, res) => {
@@ -47,6 +50,15 @@ async function run() {
       const result = await jobCollection.findOne(query);
       res.send(result)
     })
+
+  // ------------ Applications Api -------------------
+
+  // Post
+  app.post('/applications', async (req, res) => {
+    const applicationData = req.body;
+    const result = await applicationsCollection.insertOne(applicationData);
+    res.send(result)
+  } )
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
