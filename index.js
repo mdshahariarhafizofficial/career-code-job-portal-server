@@ -80,6 +80,14 @@ app.get('/applications', async (req, res) => {
   res.send(result)
 } ) 
 
+// Get Job Applications
+app.get('/applications/job/:job_id', async (req, res) => {
+  const id = req.params.job_id;
+  const query = {jobId: id}  
+  const result = await applicationsCollection.find(query).toArray();
+  res.send(result)
+})
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
