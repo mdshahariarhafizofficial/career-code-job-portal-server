@@ -37,6 +37,13 @@ async function run() {
 
 // ---------- Jobs Api -------------------
 
+    // Post Job
+    app.post('/jobs', async (req, res) => {
+      const newJob = req.body;
+      const result = await jobCollection.insertOne(newJob);
+      res.send(result);
+    })
+
     // Get All Jobs
     app.get('/jobs', async (req, res) => {
       const result = await jobCollection.find().toArray();
