@@ -46,7 +46,12 @@ async function run() {
 
     // Get All Jobs
     app.get('/jobs', async (req, res) => {
-      const result = await jobCollection.find().toArray();
+      const email = req.query.email;
+      const query = {};
+      if (email) {
+        query.hr_email = email;
+      }
+      const result = await jobCollection.find(query).toArray();
       res.send(result)
     })
 
