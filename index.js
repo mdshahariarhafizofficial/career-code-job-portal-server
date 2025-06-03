@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
-const cors = require('cors')
+const cors = require('cors');
+const jwt = require('jsonwebtoken')
 const port = process.env.PORT || 8000;
 require('dotenv').config()
 
@@ -34,6 +35,14 @@ async function run() {
     app.get('/', (req, res) => {
     res.send('Welcome to Career Code Server')
     } )
+
+  // ----------------JWT API--------------
+app.post('/jwt', (req, res) => {
+  const {email} = req.body;
+  const user = {email};
+  const token = jwt.sign(user, 'secret', {expiresIn: '1h'});
+  res.send({token})
+})
 
 // ---------- Jobs Api -------------------
 
