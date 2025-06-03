@@ -75,16 +75,35 @@ async function run() {
 // Get 
 app.get('/applications', async (req, res) => {
   const email = req.query.email;
-  const query = { email: email }
+  const query = {};
+  if (email) {
+    query.email = email;
+  }
   const result = await applicationsCollection.find(query).toArray();
   res.send(result)
 } ) 
+
+
 
 // Get Job Applications
 app.get('/applications/job/:job_id', async (req, res) => {
   const id = req.params.job_id;
   const query = {jobId: id}  
   const result = await applicationsCollection.find(query).toArray();
+  res.send(result)
+})
+
+// Update a data 
+app.patch('/applications/:id', async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const updateData = req.body.status;
+  const updatedDoc = {
+    $set: {
+      status : updateData, 
+    }
+  }
+  const result = await applicationsCollection.updateOne(filter, updatedDoc);
   res.send(result)
 })
 
