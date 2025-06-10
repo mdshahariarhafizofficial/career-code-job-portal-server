@@ -1,8 +1,8 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
-const jwt = require('jsonwebtoken')
 const port = process.env.PORT || 8000;
+const jwt = require('jsonwebtoken');
 require('dotenv').config()
 
 // Middleware
@@ -28,6 +28,8 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+
+
     const db = client.db('careerCodeDB');
     const jobCollection = db.collection('jobs');
     const applicationsCollection = db.collection('applications');
@@ -36,13 +38,13 @@ async function run() {
     res.send('Welcome to Career Code Server')
     } )
 
-  // ----------------JWT API--------------
-app.post('/jwt', (req, res) => {
-  const {email} = req.body;
-  const user = {email};
-  const token = jwt.sign(user, 'secret', {expiresIn: '1h'});
-  res.send({token})
-})
+
+    // Jwt
+    app.post('/jwt', (req, res) => {
+      const user = {email: req.body.email};
+      const token = jwt.sign(user, process.env.JWT_SECRET, {expiresIn: '7d',});
+      res.send({token, message: 'token created successfully'});
+    })
 
 // ---------- Jobs Api -------------------
 
@@ -84,6 +86,26 @@ app.post('/jwt', (req, res) => {
 // Get 
 app.get('/applications', async (req, res) => {
   const email = req.query.email;
+  const token = req?.headers?.authorization?.split(' ')[1];
+  console.log(token);
+  
+  if (token) {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (decoded) {
+        console.log(decoded);
+        
+      }
+      if (err) {
+        console.log(err);
+        
+      }
+    })
+  }
+
+  if (!token) {
+    return res.send({message: 'Ke tui Bara'})
+  }
+
   const query = {};
   if (email) {
     query.email = email;
