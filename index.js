@@ -7,7 +7,25 @@ require('dotenv').config()
 
 // Middleware
 app.use(cors())
-app.use(express.json())
+app.use(express.json());
+
+// Jwt Middleware
+const verifyJwt = async (req, res, next) => {
+  const token = req?.headers?.authorization?.split(' ')[1];
+  
+  if (!token) {
+    return res.status(401).send({message: 'Unauthorize Access!'});
+  }
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+        console.log(err);
+        return res.status(401).send({message: 'Unauthorize Access!'});
+      }
+        req.tokenEmail = decoded?.email;
+        next();
+    })  
+}
 
 // MongoDB Setup
 
@@ -28,8 +46,6 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-
-
     const db = client.db('careerCodeDB');
     const jobCollection = db.collection('jobs');
     const applicationsCollection = db.collection('applications');
@@ -41,7 +57,8 @@ async function run() {
 
     // Jwt
     app.post('/jwt', (req, res) => {
-      const user = {email: req.body.email};
+      const user = {email: req?.body?.user};
+      
       const token = jwt.sign(user, process.env.JWT_SECRET, {expiresIn: '7d',});
       res.send({token, message: 'token created successfully'});
     })
@@ -84,26 +101,14 @@ async function run() {
   } )
 
 // Get 
-app.get('/applications', async (req, res) => {
+app.get('/applications', verifyJwt, async (req, res) => {
+  const decodedEmail = req.tokenEmail;
   const email = req.query.email;
-  const token = req?.headers?.authorization?.split(' ')[1];
-  console.log(token);
-  
-  if (token) {
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-      if (decoded) {
-        console.log(decoded);
-        
-      }
-      if (err) {
-        console.log(err);
-        
-      }
-    })
-  }
-
-  if (!token) {
-    return res.send({message: 'Ke tui Bara'})
+  console.log("Email : ---------------->", email);
+  console.log("Decoded Email : ---------------->", decodedEmail);
+   
+  if (decodedEmail !== email) {
+     return res.status(403).send('Forbidden Access');
   }
 
   const query = {};
