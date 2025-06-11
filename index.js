@@ -3,16 +3,21 @@ const app = express();
 const cors = require('cors');
 const port = process.env.PORT || 8000;
 const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 require('dotenv').config()
 
 // Middleware
-app.use(cors())
+app.use(cors({
+  origin: [ 'http://localhost:5173', ],
+  credentials: true,
+}))
 app.use(express.json());
+app.use(cookieParser())
 
 // Jwt Middleware
 const verifyJwt = async (req, res, next) => {
-  const token = req?.headers?.authorization?.split(' ')[1];
-  
+  const token = req?.cookies.token;
+
   if (!token) {
     return res.status(401).send({message: 'Unauthorize Access!'});
   }
@@ -58,9 +63,12 @@ async function run() {
     // Jwt
     app.post('/jwt', (req, res) => {
       const user = {email: req?.body?.user};
-      
       const token = jwt.sign(user, process.env.JWT_SECRET, {expiresIn: '7d',});
-      res.send({token, message: 'token created successfully'});
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: false,
+      }).send({message: 'token created successfully!'})
+      // res.send({token, message: 'token created successfully'});
     })
 
 // ---------- Jobs Api -------------------
